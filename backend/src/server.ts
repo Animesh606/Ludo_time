@@ -4,6 +4,12 @@ dotenv.config();
 import app from "./app";
 import connectDB from "./config/mongoConfig";
 import redisClient from "./config/redisConfig";
+import { createServer } from "http";
+import { Server } from "socket.io";
+import socketHandler from "./utils/socketHandler";
+
+const server = createServer(app);
+const io = new Server(server);
 
 const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI || "mongodb://localhost:27017/ludo";
@@ -17,8 +23,11 @@ const MONGO_URI = process.env.MONGO_URI || "mongodb://localhost:27017/ludo";
         // Connect to Redis
         await redisClient.connect();
 
+        // Handle Socket Requests
+        socketHandler(io);
+
         // Start Express server
-        app.listen(PORT, () => {
+        server.listen(PORT, () => {
             console.log(`Server is running on http://localhost:${PORT}`);
         });
     } catch (err) {
